@@ -1,5 +1,3 @@
-## 注意源码是/ejsSrc文件夹
-
 ## 快速上手
 
 ### 1. 开发
@@ -25,3 +23,4 @@ npm run watch
 ## 了解更多
 
 你可以通过我们的[官方文档](https://iot.mi.com/vela/quickapp)熟悉和了解快应用。
+[源仓库]([https://iot.mi.com/vela/quickapp](https://gitee.com/zhao-yutian/band-reader_-band))
