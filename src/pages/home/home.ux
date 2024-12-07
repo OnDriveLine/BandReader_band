@@ -6,7 +6,7 @@
         <stack style="width: 100%; height: 100%">
           <div
             style="
-              padding: 100px 16px 16px 16px;
+            padding: 122.83px 16px 16px 16px;
               flex: 1;
               width: 100%;
               height: 100%;
@@ -17,24 +17,24 @@
           >
             <div
               class="main-card"
-              style="flex-direction: column; height: 440px"
+              style="flex-direction: column; height: 485px"
               onclick="toDirectory($item)"
             >
               <stack style="width: 100%; height: 100%">
                 <div style="justify-content: flex-end; align-items: flex-end">
                   <stack
                     if="{{$item.cover&&$item.cover.length>0}}"
-                    style="width: 260px; height: 360px"
+                    style="width: 260px; height: 505px"
                   >
                     <image
                       src="{{$item.cover}}"
                       alt="blank"
-                      style="width: 260px; height: 360px; object-fit: contain"
+                      style="width: 260px; height: 505px; object-fit: contain"
                     ></image>
                     <div
                       style="
                         width: 260px;
-                        height: 360px;
+                        height: 505px;
                         background-color: rgba(0, 0, 0, 0.4);
                       "
                     ></div>
@@ -69,18 +69,18 @@
                 </div>
               </stack>
             </div>
+            <text class="del" onclick="deleteBook($item)">删除</text>
           </div>
-          <text class="del" onclick="deleteBook($item)">删除</text>
         </stack>
       </div>
     </swiper>
-    <div else class="col" style="flex: 1; margin-top: 18px; padding-top: 100px">
+    <div else class="col" style="flex: 1; padding-top: 122.83px">
       <div
         class="main-card col"
-        style="margin-bottom: 22px; flex: 1; align-items: flex-start"
+        style="margin-bottom: 11.43px; flex: 1; align-items: flex-start"
       >
         <text style="font-size: 64px">书架空空如也</text>
-        <div style="align-items: flex-start; height: 220px; margin-top: 24px">
+        <div style="align-items: flex-start; height: 140px; margin-top: 24px">
           <image
             src="/common/icon.png"
             style="height: 140px; width: 200px; object-fit: contain"
@@ -93,88 +93,80 @@
         </div>
       </div>
       <div class="main-card" @click="help">
-        <text class="text-big">如何同步？</text>
+        <text class="text-big">同步指南</text>
         <image src="/common/goto.png"></image>
       </div>
     </div>
     <div if="{{isDel}}" class="opt">
-      <image
-        src="/common/del.png"
+      <div style="width: 100%; height: 10%"></div>
+      <div
         style="
-          width: 180px;
-          height: 160px;
           margin-top: 18px;
-          object-fit: fill;
-          margin-bottom: 44px;
-        "
-      ></image>
-      <text
-        style="
-          width: 100%;
-          font-size: 64px;
-          text-align: center;
-          line-height: 64px;
           margin-bottom: 24px;
+          justify-content: center;
+          align-items: center;
         "
-        >确认删除吗
-      </text>
+      >
+        <text style="font-size: 64px; line-height: 64px">确认删除？</text>
+      </div>
       <text
         class="font-gray"
         style="
           width: 100%;
-          font-size: 40px;
+          font-size: 50px;
           text-align: center;
           margin-bottom: 24px;
         "
         >{{ name }}
       </text>
-      <text
-        style="
-          width: 100%;
-          font-size: 42px;
-          text-align: center;
-          margin-bottom: 24px;
-        "
-        >操作不可恢复!</text
-      >
       <div
         style="
           width: 100%;
           justify-content: space-between;
           padding-bottom: 18px;
+          flex: 1;
         "
       >
-        <div class="btn no" onclick="cancel">
-          <image style="height: 44px" src="/common/x.png"></image>
+        <div class="" style="flex: 1; align-items: flex-end">
+          <image
+            style="width: 215px"
+            src="/common/button-2.png"
+            onclick="cancel"
+          ></image>
         </div>
-        <div style="width: 32px"></div>
-        <div class="btn yes" onclick="confirm">
-          <image style="height: 44px" src="/common/v.png"></image>
+        <div style="width: 4px; height: 3px"></div>
+        <div class="" style="flex: 1; align-items: flex-end">
+          <image
+            style="width: 215px"
+            src="/common/button.png"
+            onclick="confirm"
+          ></image>
         </div>
       </div>
     </div>
-    <div style="position: absolute; top: 0px; left: 0px">
-      <div class="app-title" style="margin-bottom: 12px">
-        <div style="flex: 1; justify-content: flex-start" @click="back">
+    <div if="{{!isDel}}" style="position: absolute; top: 0px; left: 0px">
+        <div style="top: 8.57px; left: 57.13px" @click="back">
           <image
-            style="height: 54px; width: 54px"
+            style="height: 103px; width: 103px"
             src="/common/left_line.png"
           ></image>
         </div>
-        <text style="font-size: 50px">
+        <text style="width: 98px;height: 45px; text-align: center; position: absolute; left:239.5px;top:10px; color:rgba(255, 255, 255, 0.6); font-size: 34.28px; font-weight: 600">
+          <span>{{time}}</span>
+        </text>
+        <text style="width: 91.41px;height: 59.99px; text-align: center; position: absolute; left:242.8px;top:50px; font-size: 45.7px; font-weight: 500">
           <span>{{pageTitle}}</span>
         </text>
-        <div style="flex: 1; justify-content: flex-end" @click="more">
+        <div style="position: absolute; top: 8.57px; left: 417.04px" @click="more">
           <image
             if="{{showMore}}"
-            style="height: 58px; width: 58px; margin-top: 8px"
+            style="height: 103px; width: 103px"
             src="/common/more.png"
           ></image>
-          <text if="{{moreText}}" style="font-size: 38px; padding-right: 16px"
+          <!-- <text if="{{moreText}}" style="font-size: 38px; padding-right: 16px"
             >{{moreText}}</text
-          >
+          > -->
         </div>
-      </div>
     </div>
   </div>
 </template>
@@ -208,6 +200,12 @@
       toRead: false,
     },
     onInit() {
+      const now=new Date()
+        this.time=`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+        setTimeout(()=>setInterval(()=>{
+            const now=new Date()
+            this.time=`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+        },1000),1000 -Date.now()%1000)
       this.$app.$def.data.emitter.on("conn", (data) => {
         this.evt = data;
       });
@@ -392,7 +390,7 @@
   .del {
     position: absolute;
     bottom: 32px;
-    right: 8px;
+    right: 15px;
     font-size: 44px;
     border-radius: 40px;
     border: 2px solid #333333;
@@ -405,9 +403,9 @@
     bottom: 0px;
     left: 0px;
     width: 100%;
-    height: 90%;
-    justify-content: flex-end;
-    padding: 14px;
+    height: 100%;
+    justify-content: flex-start;
+    padding:20px;
     align-items: center;
     background-color: black;
     border-radius: 32px;

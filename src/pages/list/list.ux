@@ -1,26 +1,27 @@
 <template>
-  <div class="demo-page" @swipe="onSwipe">
-    <div class="app-title" style="margin-bottom: 12px">
-      <div style="flex: 1; justify-content: flex-start" @click="back">
+  <scroll class="demo-page" scroll-x="false" @swipe="onSwipe">
+      <div style="top: 8.57px; left: 57.13px" @click="back">
         <image
-          style="height: 54px; width: 54px"
+          style="height: 103px; width: 103px"
           src="/common/left_line.png"
         ></image>
       </div>
-      <text style="font-size: 50px">
+      <text style="width: 98px;height: 45px; text-align: center; position: absolute; left:239.5px;top:10px; color:rgba(255, 255, 255, 0.6); font-size: 34.28px; font-weight: 600">
+        <span>{{time}}</span>
+      </text>
+      <text style="width: 91.41px;height: 59.99px; text-align: center; position: absolute; left:242.8px;top:50px; font-size: 45.7px; font-weight: 500">
         <span>{{pageTitle}}</span>
       </text>
-      <div style="flex: 1; justify-content: flex-end" @click="more">
+      <div style="position: absolute; top: 8.57px; left: 417.04px" @click="more">
         <image
-          if="{{showMore}}"
-          style="height: 58px; width: 58px; margin-top: 8px"
-          src="/common/more.png"
+          style="height: 103px; width: 103px"
+          src="/common/search.png"
         ></image>
-        <text if="{{moreText}}" style="font-size: 38px; padding-right: 16px"
+        <!-- <text if="{{moreText}}" style="font-size: 38px; padding-right: 16px"
           >{{moreText}}</text
-        >
+        > -->
       </div>
-    </div>
+
     <text style="font-size: 1px">{{ top }}</text>
     <text style="font-size: 1px">{{ bottom }}</text>
     <text style="font-size: 1px">{{ toNum }}</text>
@@ -43,13 +44,13 @@
           id="c-{{$item.index}}"
           class="item-card"
           style="align-items: flex-start; padding: 0px 0px 0px 32px"
-          onclick="toDetail($item.index,$item.paging,$item.title,$idx)"
+          onclick="toDetail($item.index,$item.paging,$item.title,syncMap[$item.index])"
         >
           <div style="flex: 1; padding: 32px 0px 32px 0px">
             <text
               style="flex: 1;color:{{curChapter === $item.index ? 'rgb(163,199,218)' : 'white'}}"
             >
-              {{ $item.title }}
+              {{ $item.title }} {{syncMap[$item.index]?'已同步':'未同步'}}
             </text>
           </div>
           <div
@@ -76,13 +77,13 @@
           id="c-{{$item.index}}"
           class="item-card"
           style="align-items: flex-start; padding: 0px 0px 0px 32px"
-          onclick="toDetail($item.index,$item.paging,$item.title,$idx)"
+          onclick="toDetail($item.index,$item.paging,$item.title,syncMap[$item.index])"
         >
           <div style="flex: 1; padding: 32px 0px 32px 0px">
             <text
               style="flex: 1;color:{{curChapter === $item.index ? 'rgb(163,199,218)' : 'white'}}"
             >
-              {{ $item.title }}
+              {{ $item.title }} {{syncMap[$item.index]?'已同步':'未同步'}}
             </text>
           </div>
           <div
@@ -102,7 +103,7 @@
       </div>
     </scroll>
     <div
-      if="{{chunk1.item.length === 0 && loading === false}}"
+      if="{{chunk1.item.length === 0 && chunk2.item.length === 0 && loading === false}}"
       style="
         position: absolute;
         top: 0;
@@ -147,6 +148,7 @@
         align-items: center;
         justify-content: flex-start;
       "
+      @swipe="onSwipe"
     >
       <text style="font-size: 50px; margin-bottom: 20px">
         <span>跳转至 </span>
@@ -175,7 +177,7 @@
         >
       </div>
     </div>
-  </div>
+  </scroll>
 </template>
 <script>
   import router from "@system.router";
@@ -187,6 +189,7 @@
   let chunks = [];
   let length = 0;
   let csize = 10;
+  let hasCheck = false;
   export default {
     // 页面级组件的数据模型，影响传入数据的覆盖机制：private内定义的属性不允许被覆盖
     private: {
@@ -215,6 +218,7 @@
       pindex: 0,
       curChapter: 0,
       toNum: 0,
+      syncMap: {},
     },
     protected: {
       p: "init",
@@ -222,6 +226,16 @@
       name: "",
       pages: 1,
       chapterNum: 0,
+    },onInit() {
+      const now=new Date()
+        this.time=`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+        setTimeout(()=>setInterval(()=>{
+            const now=new Date()
+            this.time=`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+        },1000),1000 -Date.now()%1000)
+      this.$app.$def.data.emitter.on("conn", (data) => {
+        this.evt = data;
+      });
     },
     onReady() {
       const that = this;
@@ -292,6 +306,10 @@
       return tempChunks;
     },
     chunkToObjs(chunk) {
+      let that = this;
+      if (chunk === undefined) {
+        return { page: -1, item: [] };
+      }
       this.$app.$def.sendLog(
         "chunkToObjs " +
           JSON.stringify({ page: chunk.page, length: chunk.item.length }),
@@ -307,6 +325,41 @@
               this.$app.$def.sendLog(
                 "chunkToObjs err raw=" + item + " e: " + e.toString(),
               );
+            }
+            // if (!hasCheck){
+            if (true) {
+              try {
+                hasCheck = true;
+                let uri = `internal://files/reader/${this.id}/${obj.paging}/${obj.index}_${obj.title}.txt`;
+                /*prompt.showToast({
+              message: `查询${uri}`,
+              duration: 2000
+            })*/
+                file.get({
+                  uri,
+                  success: function (data) {
+                    that.syncMap[obj.index] = true;
+                    /*prompt.showToast({
+                  message: `${obj.title} 已同步`,
+                  duration: 2000
+                })*/
+                  },
+                  fail: function (data, code) {
+                    that.syncMap[obj.index] = false;
+                    // console.log(`handling fail, code = ${code}`)
+                    /*prompt.showToast({
+                  message:`${obj.title} 未同步 code = ${code}`,
+                  duration: 2000
+                })*/
+                  },
+                });
+              } catch (e) {
+                that.syncMap[obj.index] = false;
+                /*prompt.showToast({
+              message: 'error ' + e.message,
+              duration: 2000
+            })*/
+              }
             }
             return obj;
           })
@@ -345,8 +398,8 @@
           }
           this.wait = true;
           this.$app.$def.sendLog("chunkToObjs end---");
-          this.delay(1400).then(async () => {
-            await this.delay(100);
+          this.delay(2200).then(async () => {
+            await this.delay(600);
             this.$element(`c-${this.curChapter}`).getBoundingClientRect({
               success: (data) => {
                 this.$app.$def.sendLog(
@@ -409,10 +462,21 @@
         this.showChunk = true;
       }
     },
-    toDetail(index, paging, name, idx) {
+    toDetail(index, paging, name, sync = false) {
+      if (!sync) {
+        prompt.showToast({
+          message: `${name} 未同步`,
+          duration: 2000,
+        });
+        return;
+      }
       const that = this;
       this.curChapter = index;
       let uri = `internal://files/reader/${this.id}/${paging}/${index}_${name}.txt`;
+      /*prompt.showToast({
+      message: `进入${uri}`,
+      duration: 10000
+    })*/
       //sendlog
       this.$app.$def.sendLog("to detail " + uri);
       storage.set({

@@ -1,22 +1,21 @@
 {
-  "name": "test1",
-  "version": "1.0.5",
+  "name": "BandReader",
+  "version": "1.0.6",
   "description": "",
   "engines": {
     "node": ">=8.10"
   },
   "scripts": {
-    "compile": "ts-node ejsSrc/index.ts",
     "start": "aiot server --watch --open-nuttx",
-    "build": "yarn compile && aiot build",
-    "release": "aiot release",
-    "watch": "yarn compile && aiot watch --open-nuttx",
-    "send": "yarn compile && yarn release && adb push .\\dist\\com.example.bandReader.release.1.0.5.rpk /sdcard/project ",
+    "build": "aiot build",
+    "release": "aiot release --enable-jsc --enable-protobuf --enable-image-png8",
+    "watch": "aiot watch --open-nuttx",
+    "send": "adb push ./dist/com.example.bandReader.release.1.0.6.rpk /sdcard/book/com.example.bandReader.release.1.0.6.rpk",
     "lint": "eslint --format codeframe --fix --ext .ux,.js src/"
   },
   "devDependencies": {
     "@aiot-toolkit/velasim": "^0.1.23",
-    "aiot-toolkit": "^1.0.18",
+    "aiot-toolkit": "^1.1.4",
     "autoprefixer": "^10.4.15",
     "babel-eslint": "^10.0.1",
     "eslint": "^6.8.0",
@@ -30,6 +29,7 @@
     "ux-types": "^0.1.1"
   },
   "dependencies": {
+    "@aiot-toolkit/jsc": "^1.0.7",
     "ejs": "^3.1.9",
     "live-server": "^1.2.2",
     "lodash": "^4.17.21",

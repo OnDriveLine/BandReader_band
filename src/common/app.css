@@ -4,11 +4,10 @@ div{
 }
 
 .page-cmpt{
-    width: 100%;
-    height: 100%;
+    width: 577px;
+    height: 685px;
     flex-direction: column;
     color: white;
-    padding: 14px;
 }
 
 text {
@@ -19,23 +18,13 @@ text {
     color: #9E9E9E;
 }
 
-.app-title {
-    justify-content: space-between;
-    font-weight: bold;
-    align-items: center;
-    color:white;
-    font-size: 44px;
-    width: 100%;
-    background-color: rgba(0,0,0,0.6);
-    border-radius: 4px;
-}
 .text-big{
     font-size: 52px;
 }
 
 .main-card{
     width: 100%;
-    border-radius: 44px;
+    border-radius: 52px;
     background-color: rgba(51, 45, 45, 0.6);
     color: white;
     padding: 32px 22px 32px 22px;
@@ -44,7 +33,7 @@ text {
 }
 .item-card{
     width: 100%;
-    border-radius: 44px;
+    border-radius: 52px;
     flex-shrink: 0;
     background-color: rgba(51, 45, 45, 0.6);
     color: white;

@@ -1,10 +1,16 @@
 <template>
-  <div id="page" class="demo-page" @longpress="stop">
-    <div if="{{pin}}" id="pin" class="title" @swipe="pinSwipe">
+  <div id="page" class="demo-page">
+    <div
+      if="{{pin}}"
+      id="pin"
+      class="title"
+      @swipe="pinSwipe"
+      @longpress="toggleAuto"
+    >
       <marquee
         scrollamount="{{24}}"
         loop="{{1}}"
-        style="font-size: 38px;flex: 1;color: rgb({{color}},{{color}},{{color}});"
+        style="left:80px; font-size: 38px;flex: 1;color: rgb({{color}},{{color}},{{color}});"
         onclick="routeHome"
       >
         {{ name }}
@@ -12,7 +18,7 @@
       <text
         style="width: 14px;color: rgb({{color}},{{color}},{{color}});"
       ></text>
-      <text style="font-size: 38px;color: rgb({{color}},{{color}},{{color}});"
+      <text style="right: 80px; font-size: 38px;color: rgb({{color}},{{color}},{{color}});"
         >{{ time }}</text
       >
     </div>
@@ -96,7 +102,6 @@
     name: "detail",
     private: {
       text: ["加载中..."],
-      time: "00.00",
       pin: true,
       size: 54,
       color: 255,
@@ -130,15 +135,19 @@
       chapterNum: 0,
       fromHome: false,
     },
-    onInit() {},
+    onInit() {
+      const now=new Date()
+        this.time=`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+        setTimeout(()=>setInterval(()=>{
+            const now=new Date()
+            this.time=`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+        },1000),1000 -Date.now()%1000)
+      this.$app.$def.data.emitter.on("conn", (data) => {
+        this.evt = data;
+      });
+    },
     onShow() {
-      try {
-        clearInterval(timer);
-      } catch (e) {}
-      this.setTime();
-      timer = setInterval(() => {
-        this.setTime();
-      }, 1000 * 60);
+      this.$app.$def.brightSwitch(true, true);
       this.$element("scroll").getBoundingClientRect({
         success: (info) => {
           let { height } = info;
@@ -149,19 +158,7 @@
       this.$app.$def.sendLog("config " + JSON.stringify(this.config));
       this.auto = this.config.auto;
       if (this.config.auto) {
-        prompt.showToast({
-          message: "长按停止自动翻页",
-          duration: 2000,
-        });
-        try {
-          clearInterval(timer3);
-        } catch (e) {}
-        timer3 = setInterval(
-          () => {
-            this.next();
-          },
-          Number(this.config.autoTime) * 1000,
-        );
+        this.startAuto();
       } else {
         clearInterval(timer3);
       }
@@ -221,7 +218,7 @@
         success: (data) => {
           if (data === "") {
             prompt.showToast({
-              message: "从右向左划进入设置!!!",
+              message: "从右向左划进入设置!",
               duration: 10000,
             });
             storage.set({
@@ -282,6 +279,9 @@
           }
           this.page1 = pages[this.cpage];
           this.page2 = pages[this.cpage + 1] || [];
+          if (this.page2.page === undefined) {
+            this.last = true;
+          }
           if (that.init) {
             return;
           }
@@ -369,6 +369,7 @@
       });
     },
     onTop() {
+      this.$app.$def.brightSwitch(true, true);
       //sendlog
       this.last = false;
       this.$app.$def.sendLog("onTop:" + this.page1.page + "wait:" + this.wait);
@@ -394,13 +395,14 @@
       });
     },
     onBottom() {
+      this.$app.$def.brightSwitch(true, true);
       if (this.wait) return;
       if (this.page2.page === pages[pages.length - 1].page) {
         this.last = true;
         // this.stop()
         return;
       } else {
-        this.last = false;
+        if (this.page2.page !== undefined) this.last = false;
       }
       if (
         pages[this.page1.page].item.toString() ===
@@ -425,7 +427,7 @@
             this.page1 = this.page2;
             this.page2 = pages[this.page1.page];
             this.top = height - this.wheight;
-            await this.delay();
+            await this.delay(1400);
             this.wait = false;
             this.saveOffset();
             this.changePage(this.page1.page - 1);
@@ -457,22 +459,43 @@
         "next() " + JSON.stringify({ sub, size: this.size }),
       );
     },
-    stop() {
+    startAuto() {
+      prompt.showToast({
+        message: "长按停止自动翻页",
+        duration: 2000,
+      });
+      try {
+        clearInterval(timer3);
+      } catch (e) {}
+      timer3 = setInterval(
+        () => {
+          this.next();
+        },
+        Number(this.config.autoTime) * 1000,
+      );
+    },
+    toggleAuto() {
       this.press = true;
       setTimeout(() => {
         this.press = false;
       }, 2000);
-      if (this.config.auto === false) return;
-      if (this.config.auto) {
-        prompt.showToast({
-          message: "已停止自动翻页",
-          duration: 2000,
-        });
+      if (this.config.auto === false) {
+        this.config.auto = true;
+        this.auto = true;
+        this.$app.$def.changeConfig(this.config);
+        this.startAuto();
+      } else {
+        if (this.config.auto) {
+          prompt.showToast({
+            message: "已停止自动翻页",
+            duration: 2000,
+          });
+        }
+        this.config.auto = false;
+        this.auto = false;
+        this.$app.$def.changeConfig(this.config);
+        clearInterval(timer3);
       }
-      this.config.auto = false;
-      this.auto = false;
-      this.$app.$def.changeConfig(this.config);
-      clearInterval(timer3);
     },
     config() {
       router.push({
@@ -491,10 +514,10 @@
     nextChapter() {
       //sendlog
       const that = this;
-      prompt.showToast({
-        message: "正在加载下一章 " + this.$app.$def.data.chapters.length,
-        duration: 2000,
-      });
+      /*prompt.showToast({
+      message: '正在加载下一章 ' + this.$app.$def.data.chapters.length,
+      duration: 2000
+    })*/
       this.$app.$def.sendLog(["to next chapter ", this.index, this.chapterNum]);
       if (Number(this.index) === Number(this.chapterNum) - 1) {
         prompt.showToast({
@@ -570,7 +593,7 @@
     },
     splitText() {
       this.wait = true;
-      this.$app.$def.sendLog("on split text set ture");
+      this.$app.$def.sendLog("on split text set ture " + this.uri);
       pages = [];
       this.page1 = {};
       this.page2 = {};
@@ -599,10 +622,10 @@
           // tempLines = tempLines.splice(/ {4,}/g)
           tempLines = tempLines.filter((it) => it.trim().length > 0);
           tempLines.forEach((line) => {
-            if (line.length < 200) {
+            if (line.length < 150) {
               rawLines.push(line);
             } else {
-              splitLength(line, 200).forEach((it) => {
+              splitLength(line, 150).forEach((it) => {
                 rawLines.push(it);
               });
             }
@@ -613,14 +636,14 @@
             pages.push({
               page: page++,
               height: 0,
-              item: rawLines.splice(0, 10),
+              item: rawLines.splice(0, 8),
             });
           }
           that.initPage().then();
         },
         fail: function (data, code) {
           that.wait = false;
-          console.log(`handling fail, code = ${code}`);
+          that.$app.$def.sendLog(`handling fail, code = ${code}`);
         },
       });
     },

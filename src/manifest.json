@@ -1,8 +1,8 @@
 {
   "package": "com.example.bandReader",
-  "name": "bandReader",
-  "versionName": "1.0.5",
-  "versionCode": 1,
+  "name": "BandReader",
+  "versionName": "1.0.7.1",
+  "versionCode": 2,
   "minPlatformVersion": 1000,
   "icon": "/common/logo.png",
   "deviceTypeList": [
@@ -30,9 +30,12 @@
     { "name": "system.sensor" }
 
   ],
+  "display": {
+    "backgroundColor": "#000000"
+},
   "config": {
     "logLevel": "off",
-    "designWidth": 480
+    "designWidth": 577
   },
   "router": {
     "entry": "pages/home",

@@ -8,11 +8,12 @@
     import sensor from '@system.sensor'
     import app from '@system.app'
 
-
     let counter = 0
     let tempList = []
     let writeLock
     let writePromise
+    let timeout = true
+    let timer
     export default {
         onCreate() {
             const that = this
@@ -367,7 +368,7 @@
         delBook(id) {
             this.data.books = this.data.books.filter(item => String(item.id) !== String(id))
             this.data.emitter.emit('add_book')
-            storage.delete({
+            /*storage.delete({
                 key: `chapter_${id}`,
                 success: function (data) {
                     console.log('handling success')
@@ -375,7 +376,7 @@
                 fail: function (data, code) {
                     console.log(`handling fail, code = ${code}`)
                 }
-            })
+            })*/
             file.rmdir({
                 uri: 'internal://files/reader/' + id,
                 recursive: true,
@@ -408,23 +409,21 @@
             try {
                 name = name.trim()
 
-                /*let fullContent = ""
-                if (!last) {
-                    this.chapterCache += content
-                    return
-                } else {
-                    fullContent = this.chapterCache + content
-                    this.chapterCache = ""
-                }*/
                 file.writeText({
                     uri: `internal://files/reader/${bookId}/${paging}/${index}_${name}.txt`,
                     text: content,
                     append: !Boolean(first),
                     success: function () {
-                        that.sendChunkSaved(index)
+                        that.data.emitter.emit('chunk_saved', index)
                         if (last) {
                             // that.sendChapterSaved(index)
-                            that.data.emitter.emit('chapter_saved',index)
+                            that.data.emitter.emit('chapter_saved', index)
+                            if (name.includes('第3o章两包烟')) {
+                                prompt.showToast({
+                                    message: `第3o章两包烟同步完成${content.length}`,
+                                    duration: 2000
+                                })
+                            }
                         }
                     },
                     fail: function (data, code) {
@@ -457,23 +456,66 @@
                 }
             })
         },
-        brightSwitch(checked) {
+        brightSwitch(checked, click = false) {
+            if (click && !timeout) {
+                return
+            }
+            if (click){
+                checked = this.data.config.bright
+            }
             brightness.setKeepScreenOn({
                 keepScreenOn: checked,
                 success: function () {
                     if (checked) {
-                        prompt.showToast({
-                            message: '已开启屏幕常亮'
-                        })
+                        if (!click){
+                            prompt.showToast({
+                                message: '已开启10分钟常亮'
+                            })
+                        }
+                        if (timer) {
+                            clearTimeout(timer)
+                        }else {
+                            timeout = false
+                        }
+                        timer = setTimeout(() => {
+                            brightness.setKeepScreenOn({
+                                keepScreenOn: false,
+                                success: function () {
+                                    timeout = true
+                                    /*prompt.showToast({
+                                        message: '常亮超时'
+                                    })*/
+                                },
+                            })
+                        }, 1000 * 60 * 10)
                     }
 
-                },
-                fail: function (data, code) {
-                    prompt.showToast({
-                        message: '设置屏幕常亮失败'
-                    })
                 }
             })
+
+            /*if (this.data.config.bright && timeout) {
+                brightness.setKeepScreenOn({
+                    keepScreenOn: true,
+                    success: function () {
+                        timeout = false
+                    },
+                })
+            }
+            if (!click) {
+                brightness.setKeepScreenOn({
+                    keepScreenOn: checked,
+                    success: function () {
+                        if (checked) {
+                            prompt.showToast({
+                                message: '已开启10分钟常亮'
+                            })
+                        }
+
+                    }
+                })
+            }*/
+
+
         },
         data: {
             conn: {},
